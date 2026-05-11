@@ -1,18 +1,52 @@
-
 <!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<title>Ses Uygulamam</title>
+<title>Ses Stüdyosu v1</title>
+<style>
+body {
+    font-family: Arial;
+    background: #111;
+    color: white;
+    text-align: center;
+    padding-top: 50px;
+}
+
+textarea, select, input {
+    width: 300px;
+    margin: 10px;
+    padding: 10px;
+    border-radius: 10px;
+}
+
+button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 10px;
+    background: white;
+    cursor: pointer;
+    font-weight: bold;
+}
+</style>
 </head>
-<body style="font-family:Arial;text-align:center;margin-top:50px;">
+<body>
 
-<h2>🎤 Ses Uygulaması</h2>
+<h1>🎤 SES STÜDYOSU v1</h1>
 
-<textarea id="text" rows="6" cols="40" placeholder="Bir şey yaz..."></textarea>
-<br><br>
+<textarea id="text" placeholder="Bir şey yaz..."></textarea><br>
 
-<button onclick="konus()">Sesi Çal</button>
+<select id="voiceType">
+    <option value="tr-TR">🇹🇷 Türkçe Ses</option>
+    <option value="en-US">🇺🇸 İngilizce Ses</option>
+</select><br>
+
+<label>Hız:</label>
+<input type="range" id="rate" min="0.5" max="2" step="0.1" value="1"><br>
+
+<label>Ton:</label>
+<input type="range" id="pitch" min="0" max="2" step="0.1" value="1"><br>
+
+<button onclick="konus()">▶ Sesi Çal</button>
 
 <script>
 function konus() {
@@ -20,8 +54,10 @@ function konus() {
     if (!text) return;
 
     let speech = new SpeechSynthesisUtterance(text);
-    speech.lang = "tr-TR";
-    speech.rate = 1;
+
+    speech.lang = document.getElementById("voiceType").value;
+    speech.rate = document.getElementById("rate").value;
+    speech.pitch = document.getElementById("pitch").value;
 
     speechSynthesis.speak(speech);
 }
