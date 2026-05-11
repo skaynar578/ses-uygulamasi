@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ses Stüdyosu PRO</title>
+<title>SK | Siyah Altın Ses Stüdyosu</title>
 
 <style>
 body {
     margin: 0;
     font-family: Arial;
-    background: #0f0f0f;
+    background: #0a0a0a;
     color: white;
     display: flex;
     justify-content: center;
@@ -17,37 +17,58 @@ body {
     height: 100vh;
 }
 
-.container {
-    width: 90%;
-    max-width: 500px;
-    background: #1c1c1c;
+/* ANA PANEL */
+.box {
+    width: 92%;
+    max-width: 520px;
+    background: #121212;
     padding: 25px;
-    border-radius: 15px;
-    box-shadow: 0 0 20px rgba(255,255,255,0.1);
+    border-radius: 18px;
+    box-shadow: 0 0 25px rgba(255, 215, 0, 0.15);
+    border: 1px solid rgba(255, 215, 0, 0.2);
 }
 
-h1 {
+/* LOGO */
+.logo {
     text-align: center;
+    font-size: 28px;
+    font-weight: bold;
+    color: gold;
+    margin-bottom: 5px;
+    letter-spacing: 3px;
+}
+
+.sub {
+    text-align: center;
+    font-size: 12px;
+    color: #aaa;
     margin-bottom: 20px;
 }
 
+/* TEXTAREA */
 textarea {
     width: 100%;
     height: 120px;
-    border-radius: 10px;
+    border-radius: 12px;
     border: none;
     padding: 10px;
     font-size: 14px;
+    background: #1e1e1e;
+    color: white;
 }
 
+/* INPUTLAR */
 select, input {
     width: 100%;
     margin-top: 10px;
     padding: 10px;
     border-radius: 10px;
     border: none;
+    background: #1e1e1e;
+    color: white;
 }
 
+/* BUTONLAR */
 .buttons {
     display: flex;
     gap: 10px;
@@ -56,33 +77,47 @@ select, input {
 
 button {
     flex: 1;
-    padding: 10px;
+    padding: 12px;
     border: none;
     border-radius: 10px;
     cursor: pointer;
     font-weight: bold;
 }
 
-.play { background: #00ff99; }
-.stop { background: #ff4d4d; color: white; }
-.copy { background: #4da6ff; color: white; }
-
-small {
-    display: block;
-    margin-top: 10px;
-    text-align: center;
-    opacity: 0.7;
+.play {
+    background: gold;
+    color: black;
 }
+
+.stop {
+    background: #ff3b3b;
+    color: white;
+}
+
+.api {
+    background: #4da6ff;
+    color: white;
+}
+
+/* STATUS */
+.status {
+    text-align: center;
+    margin-top: 10px;
+    font-size: 12px;
+    color: #aaa;
+}
+
 </style>
 </head>
 
 <body>
 
-<div class="container">
+<div class="box">
 
-<h1>🎤 SES STÜDYOSU PRO</h1>
+<div class="logo">SK</div>
+<div class="sub">Siyah Altın Ses Stüdyosu PRO</div>
 
-<textarea id="text" placeholder="Yazı yaz..."></textarea>
+<textarea id="text" placeholder="Metin yaz..."></textarea>
 
 <select id="lang">
     <option value="tr-TR">🇹🇷 Türkçe</option>
@@ -96,18 +131,21 @@ small {
 <input type="range" id="pitch" min="0" max="2" step="0.1" value="1">
 
 <div class="buttons">
-<button class="play" onclick="play()">▶ Çal</button>
-<button class="stop" onclick="stop()">⏹ Dur</button>
-<button class="copy" onclick="copyText()">📋 Kopyala</button>
+<button class="play" onclick="playLocal()">▶ SES</button>
+<button class="stop" onclick="stop()">⏹</button>
+<button class="api" onclick="aiVoice()">⚡ AI SES</button>
 </div>
 
-<small>GitHub Pages PRO Voice Studio</small>
+<div class="status" id="status">Hazır</div>
 
 </div>
 
 <script>
 
-function play() {
+/* =========================
+   NORMAL SES (ÇALIŞIR)
+========================= */
+function playLocal() {
     let text = document.getElementById("text").value;
     if (!text) return;
 
@@ -119,17 +157,32 @@ function play() {
     speech.pitch = document.getElementById("pitch").value;
 
     speechSynthesis.speak(speech);
+
+    document.getElementById("status").innerText = "Normal ses çalışıyor";
 }
 
+/* DURDUR */
 function stop() {
     speechSynthesis.cancel();
 }
 
-function copyText() {
-    let text = document.getElementById("text");
-    text.select();
-    document.execCommand("copy");
-    alert("Kopyalandı!");
+/* =========================
+   AI SES (API HAZIRLIK)
+========================= */
+function aiVoice() {
+
+    let text = document.getElementById("text").value;
+    if (!text) return;
+
+    document.getElementById("status").innerText = "AI ses hazırlanıyor...";
+
+    /* BURAYA GERÇEK API BAĞLANACAK */
+
+    setTimeout(() => {
+        document.getElementById("status").innerText =
+        "AI sistem bağlı değil (API gerekli)";
+        alert("AI ses için API bağlanacak (sonraki adım)");
+    }, 1000);
 }
 
 </script>
