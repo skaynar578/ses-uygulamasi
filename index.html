@@ -2,65 +2,136 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<title>Ses Stüdyosu v1</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ses Stüdyosu PRO</title>
+
 <style>
 body {
+    margin: 0;
     font-family: Arial;
-    background: #111;
+    background: #0f0f0f;
     color: white;
-    text-align: center;
-    padding-top: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
 }
 
-textarea, select, input {
-    width: 300px;
-    margin: 10px;
+.container {
+    width: 90%;
+    max-width: 500px;
+    background: #1c1c1c;
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: 0 0 20px rgba(255,255,255,0.1);
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+textarea {
+    width: 100%;
+    height: 120px;
+    border-radius: 10px;
+    border: none;
+    padding: 10px;
+    font-size: 14px;
+}
+
+select, input {
+    width: 100%;
+    margin-top: 10px;
     padding: 10px;
     border-radius: 10px;
+    border: none;
+}
+
+.buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
 }
 
 button {
-    padding: 10px 20px;
+    flex: 1;
+    padding: 10px;
     border: none;
     border-radius: 10px;
-    background: white;
     cursor: pointer;
     font-weight: bold;
 }
+
+.play { background: #00ff99; }
+.stop { background: #ff4d4d; color: white; }
+.copy { background: #4da6ff; color: white; }
+
+small {
+    display: block;
+    margin-top: 10px;
+    text-align: center;
+    opacity: 0.7;
+}
 </style>
 </head>
+
 <body>
 
-<h1>🎤 SES STÜDYOSU v1</h1>
+<div class="container">
 
-<textarea id="text" placeholder="Bir şey yaz..."></textarea><br>
+<h1>🎤 SES STÜDYOSU PRO</h1>
 
-<select id="voiceType">
-    <option value="tr-TR">🇹🇷 Türkçe Ses</option>
-    <option value="en-US">🇺🇸 İngilizce Ses</option>
-</select><br>
+<textarea id="text" placeholder="Yazı yaz..."></textarea>
 
-<label>Hız:</label>
-<input type="range" id="rate" min="0.5" max="2" step="0.1" value="1"><br>
+<select id="lang">
+    <option value="tr-TR">🇹🇷 Türkçe</option>
+    <option value="en-US">🇺🇸 English</option>
+</select>
 
-<label>Ton:</label>
-<input type="range" id="pitch" min="0" max="2" step="0.1" value="1"><br>
+<label>Hız</label>
+<input type="range" id="rate" min="0.5" max="2" step="0.1" value="1">
 
-<button onclick="konus()">▶ Sesi Çal</button>
+<label>Ton</label>
+<input type="range" id="pitch" min="0" max="2" step="0.1" value="1">
+
+<div class="buttons">
+<button class="play" onclick="play()">▶ Çal</button>
+<button class="stop" onclick="stop()">⏹ Dur</button>
+<button class="copy" onclick="copyText()">📋 Kopyala</button>
+</div>
+
+<small>GitHub Pages PRO Voice Studio</small>
+
+</div>
 
 <script>
-function konus() {
+
+function play() {
     let text = document.getElementById("text").value;
     if (!text) return;
 
-    let speech = new SpeechSynthesisUtterance(text);
+    speechSynthesis.cancel();
 
-    speech.lang = document.getElementById("voiceType").value;
+    let speech = new SpeechSynthesisUtterance(text);
+    speech.lang = document.getElementById("lang").value;
     speech.rate = document.getElementById("rate").value;
     speech.pitch = document.getElementById("pitch").value;
 
     speechSynthesis.speak(speech);
 }
+
+function stop() {
+    speechSynthesis.cancel();
+}
+
+function copyText() {
+    let text = document.getElementById("text");
+    text.select();
+    document.execCommand("copy");
+    alert("Kopyalandı!");
+}
+
 </script>
 
 </body>
