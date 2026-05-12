@@ -2,37 +2,48 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<title>SK AI VOICE STUDIO</title>
+<title>SK PRO MÜZİK STÜDYO</title>
 </head>
 
 <body style="background:#111;color:#d4af37;text-align:center;font-family:Arial">
 
-<h1>🎤 SK AI SES KLON STÜDYO</h1>
+<h1>🎤 SK PRO MÜZİK STÜDYO</h1>
 
-<textarea id="text" style="width:80%;height:120px"></textarea>
-<br><br>
-
-<button onclick="generate()">🔊 SES ÜRET</button>
+<textarea id="lyrics" placeholder="Şarkı sözleri..." style="width:80%;height:120px"></textarea>
 
 <br><br>
 
-<audio id="audio" controls></audio>
+<input id="style" placeholder="arabesk / rap / pop">
+
+<br><br>
+
+<button onclick="createSong()">🎵 ÜRET</button>
+
+<br><br>
+
+<h3>🎤 Vokal</h3>
+<audio id="voice" controls></audio>
+
+<h3>🎵 Beat</h3>
+<audio id="beat" controls></audio>
 
 <script>
 
-async function generate(){
+async function createSong(){
 
-    const text = document.getElementById("text").value;
+    const lyrics = document.getElementById("lyrics").value;
+    const style = document.getElementById("style").value;
 
-    const res = await fetch("http://localhost:3000/generate", {
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        body: JSON.stringify({text})
+    const res = await fetch("http://localhost:3000/create-song", {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({lyrics, style})
     });
 
     const data = await res.json();
 
-    document.getElementById("audio").src = data.audio;
+    document.getElementById("voice").src = data.voice_audio;
+    document.getElementById("beat").src = data.beat;
 }
 
 </script>
