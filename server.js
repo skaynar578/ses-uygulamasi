@@ -1,64 +1,35 @@
 const express = require("express");
 const cors = require("cors");
-const axios = require("axios");
 
 const app = express();
 
 app.use(cors());
-app.use(express.json({ limit: "10mb" }));
+app.use(express.json());
 
-// 🔑 ENV KEY (Render için güvenli)
-const API_KEY = process.env.API_KEY;
-const VOICE_ID = "21m00Tcm4TlvDq8ikWAM";
+// 🔥 TEST ROUTE
+app.get("/", (req, res) => {
+    res.send("SK PRO API ÇALIŞIYOR");
+});
 
-// 🎤 CREATE ENDPOINT
-app.post("/create", async (req, res) => {
+// 🎤 SADE MOCK AI (ELEVENLABS YOK - ÖNCE TEST)
+app.post("/create", (req, res) => {
 
     const { lyrics, style } = req.body;
 
     if (!lyrics) {
-        return res.status(400).json({ error: "Şarkı sözü yok" });
+        return res.status(400).json({ error: "Şarkı yok" });
     }
 
-    try {
-
-        // 🎤 ELEVENLABS
-        const voice = await axios({
-            method: "POST",
-            url: `https://api.elevenlabs.io/v1/text-to-speech/${VOICE_ID}`,
-            data: {
-                text: lyrics,
-                model_id: "eleven_multilingual_v2"
-            },
-            headers: {
-                "xi-api-key": API_KEY,
-                "Content-Type": "application/json",
-                "Accept": "audio/mpeg"
-            },
-            responseType: "arraybuffer"
-        });
-
-        const voiceBase64 = Buffer.from(voice.data).toString("base64");
-
-        // 🎵 DEMO BEAT
-        const beat = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3";
-
-        res.json({
-            status: "ok",
-            style: style || "default",
-            voice: "data:audio/mpeg;base64," + voiceBase64,
-            beat
-        });
-
-    } catch (err) {
-        console.log("HATA:", err.response?.data || err.message);
-        res.status(500).json({ error: "AI üretim hatası" });
-    }
+    res.json({
+        voice: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
+        beat: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
+        style: style || "default"
+    });
 });
 
-// 🌍 PORT (RENDER UYUMLU)
+// 🌍 PORT
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
-    console.log("🔥 SK PRO ACTIVE → PORT:", PORT);
+    console.log("SK PRO RUNNING:", PORT);
 });
