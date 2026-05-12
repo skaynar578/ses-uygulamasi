@@ -2,34 +2,34 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<title>SK PRO AI</title>
+<title>SK PRO AI VOICE</title>
 </head>
 
 <body style="background:#111;color:#d4af37;text-align:center;font-family:Arial">
 
-<h1>🎤 SK PRO AI</h1>
+<h1>🎤 SK PRO AI - SENİN SESİNLE ŞARKI</h1>
 
-<textarea id="lyrics" placeholder="Şarkı yaz..." style="width:80%;height:120px"></textarea>
-
-<br><br>
-
-<input id="style" placeholder="rap / arabesk / pop">
+<textarea id="lyrics" placeholder="Şarkı sözleri..." style="width:80%;height:120px"></textarea>
 
 <br><br>
 
-<button onclick="generate()">🎵 ÜRET</button>
+<input id="style" placeholder="arabesk / rap / pop">
+
+<br><br>
+
+<button onclick="generate()">🎵 SÖYLE</button>
 
 <p id="status"></p>
 
-<h3>🎤 Vokal</h3>
+<h3>🎤 SENİN SESİN</h3>
 <audio id="voice" controls></audio>
 
-<h3>🎵 Beat</h3>
+<h3>🎵 BEAT</h3>
 <audio id="beat" controls></audio>
 
 <script>
 
-const API_URL = "http://localhost:3000/create";
+const API_URL = "https://SENIN-RENDER-URL.onrender.com/create";
 
 async function generate(){
 
@@ -37,7 +37,7 @@ async function generate(){
     const style = document.getElementById("style").value;
     const status = document.getElementById("status");
 
-    status.innerText = "Üretiliyor...";
+    status.innerText = "🎤 Ses üretiliyor...";
 
     try {
 
@@ -49,13 +49,15 @@ async function generate(){
 
         const data = await res.json();
 
+        if(!res.ok) throw new Error(data.error);
+
         document.getElementById("voice").src = data.voice;
         document.getElementById("beat").src = data.beat;
 
-        status.innerText = "Hazır ✔";
+        status.innerText = "✅ Hazır - Senin sesinle söylendi";
 
     } catch(err){
-        status.innerText = "Hata: " + err.message;
+        status.innerText = "❌ " + err.message;
     }
 }
 
