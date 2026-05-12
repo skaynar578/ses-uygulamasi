@@ -1,4 +1,3 @@
-
 const express = require("express");
 const cors = require("cors");
 const axios = require("axios");
@@ -7,29 +6,35 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// 🔑 BURAYA ELEVENLABS KEYİNİ KOY
-const ELEVEN_API_KEY = "API_KEY_BURAYA";
+// 🔑 ELEVENLABS KEY
+const API_KEY = "BURAYA_KEY";
 
-app.post("/song", async (req, res) => {
+// 🎤 VOICE ID (senin klon sesin)
+const VOICE_ID = "BURAYA_VOICE_ID";
 
-    const { lyrics, style } = req.body;
+app.post("/generate", async (req, res) => {
 
-    if(!lyrics){
-        return res.status(400).json({ error: "Şarkı yok" });
+    const { text } = req.body;
+
+    if(!text){
+        return res.status(400).json({ error: "metin yok" });
     }
 
     try {
 
-        // 🎤 SES ÜRET (ElevenLabs)
-        const voice = await axios.post(
-            "https://api.elevenlabs.io/v1/text-to-speech/21m00Tcm4TlvDq8ikWAM",
+        const response = await axios.post(
+            `https://api.elevenlabs.io/v1/text-to-speech/${VOICE_ID}`,
             {
-                text: lyrics,
-                model_id: "eleven_multilingual_v2"
+                text: text,
+                model_id: "eleven_multilingual_v2",
+                voice_settings: {
+                    stability: 0.5,
+                    similarity_boost: 0.8
+                }
             },
             {
                 headers: {
-                    "xi-api-key": ELEVEN_API_KEY,
+                    "xi-api-key": API_KEY,
                     "Content-Type": "application/json",
                     "Accept": "audio/mpeg"
                 },
@@ -37,21 +42,19 @@ app.post("/song", async (req, res) => {
             }
         );
 
-        // 🎵 MÜZİK (şimdilik demo link)
-        const musicUrl = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3";
+        const audioBase64 = Buffer.from(response.data, "binary").toString("base64");
 
         res.json({
-            status: "ok",
-            voice: "generated",
-            music: musicUrl
+            success: true,
+            audio: "data:audio/mpeg;base64," + audioBase64
         });
 
     } catch (err) {
-        console.log(err.message);
+        console.log(err.response?.data || err.message);
         res.status(500).json({ error: "AI hata verdi" });
     }
 });
 
 app.listen(3000, () => {
-    console.log("🔥 SK AI STUDIO RUNNING http://localhost:3000");
+    console.log("🔥 SK AI VOICE RUNNING");
 });
