@@ -31,8 +31,8 @@
 
 <script>
 
-// 🌍 BURAYA RENDER URL GELECEK
-const API_URL = "https://SENIN-RENDER-URL.onrender.com/create";
+// 🔥 BURAYA RENDER LINKİNİ KOYACAKSIN
+const API_URL = "https://SENIN-RENDER-ADRESIN.onrender.com/create";
 
 async function generate(){
 
@@ -50,11 +50,9 @@ async function generate(){
             body: JSON.stringify({lyrics, style})
         });
 
-        if(!res.ok){
-            throw new Error("Server hatası: " + res.status);
-        }
-
         const data = await res.json();
+
+        if(!res.ok) throw new Error(data.error || "Hata");
 
         document.getElementById("voice").src = data.voice;
         document.getElementById("beat").src = data.beat;
@@ -62,7 +60,7 @@ async function generate(){
         status.innerText = "✅ Hazır";
 
     } catch(err){
-        status.innerText = "❌ Hata: " + err.message;
+        status.innerText = "❌ " + err.message;
     }
 }
 
