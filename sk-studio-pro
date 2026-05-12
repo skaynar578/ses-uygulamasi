@@ -1,1 +1,29 @@
 
+const express = require("express");
+const cors = require("cors");
+
+const app = express();
+app.use(cors());
+app.use(express.json());
+
+app.post("/song", (req, res) => {
+
+    const { lyrics, style } = req.body;
+
+    if(!lyrics){
+        return res.status(400).json({ error: "Şarkı sözü yok" });
+    }
+
+    console.log("Şarkı isteği geldi:");
+    console.log(lyrics, style);
+
+    // şimdilik demo cevap
+    res.json({
+        status: "ok",
+        url: "https://demo-music-file.mp3"
+    });
+});
+
+app.listen(3000, () => {
+    console.log("SK STÜDYO PRO çalışıyor → http://localhost:3000");
+});
