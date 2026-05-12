@@ -17,7 +17,7 @@ body{
     padding:20px;
     font-size:26px;
     font-weight:bold;
-    border-bottom:2px solid #d4af37;A
+    border-bottom:2px solid #d4af37;
 }
 
 .logo{
@@ -89,8 +89,9 @@ button:hover{
 
 <script>
 
-const API_KEY = "sk_4c496aab3618cdd3e1d55c4df719c28501f5f46ab51121fa";
-    
+// 🔑 BURAYA KENDİ KEYİNİ YAPIŞTIR
+const API_KEY = "BURAYA_KEYINI_YAZ";
+
 async function playVoice(){
 
     let text = document.getElementById("text").value;
@@ -107,7 +108,8 @@ async function playVoice(){
             method: "POST",
             headers: {
                 "xi-api-key": API_KEY,
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                "Accept": "audio/mpeg"
             },
             body: JSON.stringify({
                 text: text,
@@ -121,7 +123,9 @@ async function playVoice(){
     );
 
     if(!response.ok){
-        alert("API hatası! Key kontrol et.");
+        const err = await response.text();
+        console.log(err);
+        alert("API hatası: " + err);
         return;
     }
 
