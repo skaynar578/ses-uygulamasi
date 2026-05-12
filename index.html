@@ -2,7 +2,7 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<title>SK MÜZİK STÜDYO PRO</title>
+<title>SK STÜDYO PRO</title>
 
 <style>
 body{
@@ -13,53 +13,35 @@ body{
     text-align:center;
 }
 
-h1{
-    margin-top:20px;
-}
-
 textarea{
     width:80%;
     height:120px;
-    margin-top:10px;
-    border-radius:10px;
+    margin-top:20px;
     padding:10px;
-    font-size:14px;
 }
 
 input, button{
-    padding:10px;
     margin-top:10px;
-    border-radius:8px;
-    border:none;
+    padding:10px;
 }
 
 button{
     background:#d4af37;
+    border:none;
     font-weight:bold;
     cursor:pointer;
-}
-
-button:hover{
-    background:#b8902f;
-}
-
-#status{
-    margin-top:15px;
-    color:#aaa;
 }
 </style>
 </head>
 
 <body>
 
-<h1>🎤 SK MÜZİK STÜDYO PRO</h1>
-
-<p>Şarkı Sözü + Stil → AI Şarkı Üretimi</p>
+<h1>🎤 SK MÜZİK STÜDYO</h1>
 
 <textarea id="lyrics" placeholder="Şarkı sözünü yaz..."></textarea>
 <br>
 
-<input id="style" placeholder="stil: arabesk / pop / rap">
+<input id="style" placeholder="stil (arabesk / pop)">
 <br>
 
 <button onclick="createSong()">🎵 Şarkı Üret</button>
@@ -74,33 +56,22 @@ async function createSong(){
     let style = document.getElementById("style").value;
     let status = document.getElementById("status");
 
-    if(!lyrics){
-        alert("Şarkı sözü yaz!");
-        return;
-    }
+    status.innerText = "Üretiliyor...";
 
-    status.innerText = "⏳ Şarkı üretiliyor...";
+    const res = await fetch("http://localhost:3000/song", {
+        method:"POST",
+        headers:{
+            "Content-Type":"application/json"
+        },
+        body: JSON.stringify({
+            lyrics,
+            style
+        })
+    });
 
-    try{
-        const res = await fetch("http://localhost:3000/song", {
-            method:"POST",
-            headers:{
-                "Content-Type":"application/json"
-            },
-            body: JSON.stringify({
-                lyrics,
-                style
-            })
-        });
+    const data = await res.json();
 
-        const data = await res.json();
-
-        status.innerText = "✅ Hazır: " + data.url;
-
-    }catch(err){
-        console.log(err);
-        status.innerText = "❌ Sunucu hatası";
-    }
+    status.innerText = "Hazır: " + data.url;
 }
 
 </script>
