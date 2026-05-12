@@ -2,12 +2,12 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<title>SK PRO MÜZİK STÜDYO</title>
+<title>SK PRO AI MÜZİK STÜDYO</title>
 </head>
 
-<body style="background:#111;color:#d4af37;text-align:center;font-family:Arial">
+<body style="background:#0f0f0f;color:#d4af37;text-align:center;font-family:Arial">
 
-<h1>🎤 SK PRO MÜZİK STÜDYO</h1>
+<h1>🎤 SK PRO AI MÜZİK STÜDYO</h1>
 
 <textarea id="lyrics" placeholder="Şarkı sözleri..." style="width:80%;height:120px"></textarea>
 
@@ -17,7 +17,7 @@
 
 <br><br>
 
-<button onclick="createSong()">🎵 ÜRET</button>
+<button onclick="generate()">🎵 ÜRET</button>
 
 <br><br>
 
@@ -29,12 +29,12 @@
 
 <script>
 
-async function createSong(){
+async function generate(){
 
     const lyrics = document.getElementById("lyrics").value;
     const style = document.getElementById("style").value;
 
-    const res = await fetch("http://localhost:3000/create-song", {
+    const res = await fetch("http://localhost:3000/create", {
         method: "POST",
         headers: {"Content-Type":"application/json"},
         body: JSON.stringify({lyrics, style})
@@ -42,7 +42,7 @@ async function createSong(){
 
     const data = await res.json();
 
-    document.getElementById("voice").src = data.voice_audio;
+    document.getElementById("voice").src = data.voice;
     document.getElementById("beat").src = data.beat;
 }
 
