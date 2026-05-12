@@ -6,17 +6,17 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// 🔑 ELEVENLABS KEY
-const API_KEY = "BURAYA_KEY";
+// 🔑 ELEVENLABS API KEY (BURAYA SENİN KEY)
+const API_KEY = "sk_4c496aab3618cdd3e1d55c4df719c28501f5f46ab51121fa";
 
-// 🎤 VOICE ID (senin klon sesin)
-const VOICE_ID = "BURAYA_VOICE_ID";
+// 🎤 VOICE ID (örnek erkek ses)
+const VOICE_ID = "21m00Tcm4TlvDq8ikWAM";
 
 app.post("/generate", async (req, res) => {
 
     const { text } = req.body;
 
-    if(!text){
+    if (!text) {
         return res.status(400).json({ error: "metin yok" });
     }
 
@@ -42,7 +42,7 @@ app.post("/generate", async (req, res) => {
             }
         );
 
-        const audioBase64 = Buffer.from(response.data, "binary").toString("base64");
+        const audioBase64 = Buffer.from(response.data).toString("base64");
 
         res.json({
             success: true,
@@ -50,11 +50,11 @@ app.post("/generate", async (req, res) => {
         });
 
     } catch (err) {
-        console.log(err.response?.data || err.message);
+        console.log("HATA:", err.response?.data || err.message);
         res.status(500).json({ error: "AI hata verdi" });
     }
 });
 
 app.listen(3000, () => {
-    console.log("🔥 SK AI VOICE RUNNING");
+    console.log("🔥 SK AI VOICE STUDIO RUNNING http://localhost:3000");
 });
