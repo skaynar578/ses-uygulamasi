@@ -2,76 +2,43 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<title>SK STÜDYO PRO</title>
-
-<style>
-body{
-    margin:0;
-    font-family:Arial;
-    background:#0d0d0d;
-    color:#d4af37;
-    text-align:center;
-}
-
-textarea{
-    width:80%;
-    height:120px;
-    margin-top:20px;
-    padding:10px;
-}
-
-input, button{
-    margin-top:10px;
-    padding:10px;
-}
-
-button{
-    background:#d4af37;
-    border:none;
-    font-weight:bold;
-    cursor:pointer;
-}
-</style>
+<title>SK AI MÜZİK STÜDYO PRO</title>
 </head>
 
-<body>
+<body style="background:#111;color:#d4af37;text-align:center;font-family:Arial">
 
-<h1>🎤 SK MÜZİK STÜDYO</h1>
+<h1>🎤 SK AI MÜZİK STÜDYO PRO</h1>
 
-<textarea id="lyrics" placeholder="Şarkı sözünü yaz..."></textarea>
-<br>
+<textarea id="lyrics" style="width:80%;height:120px"></textarea>
+<br><br>
 
-<input id="style" placeholder="stil (arabesk / pop)">
-<br>
+<input id="style" placeholder="arabesk / rap / pop">
+<br><br>
 
-<button onclick="createSong()">🎵 Şarkı Üret</button>
+<button onclick="send()">🎵 ÜRET</button>
 
-<p id="status"></p>
+<p id="out"></p>
+
+<audio id="player" controls style="margin-top:20px;"></audio>
 
 <script>
 
-async function createSong(){
+async function send(){
 
-    let lyrics = document.getElementById("lyrics").value;
-    let style = document.getElementById("style").value;
-    let status = document.getElementById("status");
-
-    status.innerText = "Üretiliyor...";
+    const lyrics = document.getElementById("lyrics").value;
+    const style = document.getElementById("style").value;
 
     const res = await fetch("http://localhost:3000/song", {
         method:"POST",
-        headers:{
-            "Content-Type":"application/json"
-        },
-        body: JSON.stringify({
-            lyrics,
-            style
-        })
+        headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({lyrics,style})
     });
 
     const data = await res.json();
 
-    status.innerText = "Hazır: " + data.url;
+    document.getElementById("out").innerText = "Hazır";
+
+    document.getElementById("player").src = data.music;
 }
 
 </script>
