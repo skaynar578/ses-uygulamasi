@@ -7,9 +7,11 @@ const app = express();
 app.use(cors());
 app.use(express.json({ limit: "10mb" }));
 
-const API_KEY = "ELEVENLABS_KEY_BURAYA";
+// 🔑 ENV KEY (Render için güvenli)
+const API_KEY = process.env.API_KEY;
 const VOICE_ID = "21m00Tcm4TlvDq8ikWAM";
 
+// 🎤 CREATE ENDPOINT
 app.post("/create", async (req, res) => {
 
     const { lyrics, style } = req.body;
@@ -20,7 +22,7 @@ app.post("/create", async (req, res) => {
 
     try {
 
-        // 🎤 ELEVENLABS DOĞRU FORMAT (FIXED)
+        // 🎤 ELEVENLABS
         const voice = await axios({
             method: "POST",
             url: `https://api.elevenlabs.io/v1/text-to-speech/${VOICE_ID}`,
@@ -38,10 +40,12 @@ app.post("/create", async (req, res) => {
 
         const voiceBase64 = Buffer.from(voice.data).toString("base64");
 
+        // 🎵 DEMO BEAT
         const beat = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3";
 
         res.json({
             status: "ok",
+            style: style || "default",
             voice: "data:audio/mpeg;base64," + voiceBase64,
             beat
         });
@@ -52,6 +56,9 @@ app.post("/create", async (req, res) => {
     }
 });
 
-app.listen(3000, () => {
-    console.log("🔥 SK PRO ACTIVE → http://localhost:3000");
+// 🌍 PORT (RENDER UYUMLU)
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+    console.log("🔥 SK PRO ACTIVE → PORT:", PORT);
 });
