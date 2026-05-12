@@ -19,7 +19,9 @@
 
 <button onclick="generate()">🎵 ÜRET</button>
 
-<br><br>
+<p id="status"></p>
+
+<br>
 
 <h3>🎤 Vokal</h3>
 <audio id="voice" controls></audio>
@@ -34,16 +36,36 @@ async function generate(){
     const lyrics = document.getElementById("lyrics").value;
     const style = document.getElementById("style").value;
 
-    const res = await fetch("http://localhost:3000/create", {
-        method: "POST",
-        headers: {"Content-Type":"application/json"},
-        body: JSON.stringify({lyrics, style})
-    });
+    const status = document.getElementById("status");
+    status.innerText = "⏳ Üretiliyor...";
 
-    const data = await res.json();
+    try {
 
-    document.getElementById("voice").src = data.voice;
-    document.getElementById("beat").src = data.beat;
+        const res = await fetch("http://localhost:3000/create", {
+            method: "POST",
+            headers: {"Content-Type":"application/json"},
+            body: JSON.stringify({lyrics, style})
+        });
+
+        if(!res.ok){
+            throw new Error("Sunucu hatası: " + res.status);
+        }
+
+        const data = await res.json();
+
+        if(!data.voice || !data.beat){
+            throw new Error("Eksik veri döndü");
+        }
+
+        document.getElementById("voice").src = data.voice;
+        document.getElementById("beat").src = data.beat;
+
+        status.innerText = "✅ Hazır";
+
+    } catch(err){
+        console.error(err);
+        status.innerText = "❌ Hata: " + err.message;
+    }
 }
 
 </script>
