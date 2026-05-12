@@ -2,43 +2,37 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<title>SK AI MÜZİK STÜDYO PRO</title>
+<title>SK AI VOICE STUDIO</title>
 </head>
 
 <body style="background:#111;color:#d4af37;text-align:center;font-family:Arial">
 
-<h1>🎤 SK AI MÜZİK STÜDYO PRO</h1>
+<h1>🎤 SK AI SES KLON STÜDYO</h1>
 
-<textarea id="lyrics" style="width:80%;height:120px"></textarea>
+<textarea id="text" style="width:80%;height:120px"></textarea>
 <br><br>
 
-<input id="style" placeholder="arabesk / rap / pop">
+<button onclick="generate()">🔊 SES ÜRET</button>
+
 <br><br>
 
-<button onclick="send()">🎵 ÜRET</button>
-
-<p id="out"></p>
-
-<audio id="player" controls style="margin-top:20px;"></audio>
+<audio id="audio" controls></audio>
 
 <script>
 
-async function send(){
+async function generate(){
 
-    const lyrics = document.getElementById("lyrics").value;
-    const style = document.getElementById("style").value;
+    const text = document.getElementById("text").value;
 
-    const res = await fetch("http://localhost:3000/song", {
+    const res = await fetch("http://localhost:3000/generate", {
         method:"POST",
         headers:{"Content-Type":"application/json"},
-        body: JSON.stringify({lyrics,style})
+        body: JSON.stringify({text})
     });
 
     const data = await res.json();
 
-    document.getElementById("out").innerText = "Hazır";
-
-    document.getElementById("player").src = data.music;
+    document.getElementById("audio").src = data.audio;
 }
 
 </script>
