@@ -2,26 +2,24 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<title>SK PRO AI MÜZİK STÜDYO</title>
+<title>SK PRO AI</title>
 </head>
 
-<body style="background:#0f0f0f;color:#d4af37;text-align:center;font-family:Arial">
+<body style="background:#111;color:#d4af37;text-align:center;font-family:Arial">
 
-<h1>🎤 SK PRO AI MÜZİK STÜDYO</h1>
+<h1>🎤 SK PRO AI</h1>
 
-<textarea id="lyrics" placeholder="Şarkı sözleri..." style="width:80%;height:120px"></textarea>
+<textarea id="lyrics" placeholder="Şarkı yaz..." style="width:80%;height:120px"></textarea>
 
 <br><br>
 
-<input id="style" placeholder="arabesk / rap / pop">
+<input id="style" placeholder="rap / arabesk / pop">
 
 <br><br>
 
 <button onclick="generate()">🎵 ÜRET</button>
 
 <p id="status"></p>
-
-<br>
 
 <h3>🎤 Vokal</h3>
 <audio id="voice" controls></audio>
@@ -31,8 +29,7 @@
 
 <script>
 
-// 🔥 BURAYA RENDER LINKİNİ KOYACAKSIN
-const API_URL = "https://SENIN-RENDER-ADRESIN.onrender.com/create";
+const API_URL = "http://localhost:3000/create";
 
 async function generate(){
 
@@ -40,7 +37,7 @@ async function generate(){
     const style = document.getElementById("style").value;
     const status = document.getElementById("status");
 
-    status.innerText = "⏳ Üretiliyor...";
+    status.innerText = "Üretiliyor...";
 
     try {
 
@@ -52,15 +49,13 @@ async function generate(){
 
         const data = await res.json();
 
-        if(!res.ok) throw new Error(data.error || "Hata");
-
         document.getElementById("voice").src = data.voice;
         document.getElementById("beat").src = data.beat;
 
-        status.innerText = "✅ Hazır";
+        status.innerText = "Hazır ✔";
 
     } catch(err){
-        status.innerText = "❌ " + err.message;
+        status.innerText = "Hata: " + err.message;
     }
 }
 
