@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SK SES STUDIO PRO</title>
+<title>AI SES PRO 2</title>
 
 <style>
 body{
@@ -15,153 +15,131 @@ body{
     padding:20px;
 }
 
-h1{margin-bottom:10px;}
+h1{
+    margin-bottom:15px;
+}
 
 textarea{
     width:90%;
-    height:120px;
-    padding:10px;
+    height:140px;
+    padding:12px;
     font-size:16px;
     border-radius:10px;
-}
-
-select, input, button{
-    margin:5px;
-    padding:10px;
-    border-radius:8px;
     border:none;
-    font-size:14px;
+    outline:none;
 }
 
 button{
+    margin:5px;
+    padding:12px 16px;
+    border:none;
+    border-radius:8px;
     cursor:pointer;
     background:#1e90ff;
     color:white;
+    font-weight:bold;
 }
 
 button:hover{
     background:#0066cc;
+}
+
+#status{
+    margin-top:10px;
+    font-size:14px;
+    color:#aaa;
+}
+
+/* mini player */
+#playerBox{
+    position:fixed;
+    bottom:15px;
+    left:50%;
+    transform:translateX(-50%);
+    background:#111;
+    padding:10px;
+    border-radius:12px;
+    width:90%;
+    max-width:450px;
+    display:none;
+    box-shadow:0 0 10px rgba(255,255,255,0.1);
+}
+
+audio{
+    width:100%;
 }
 </style>
 </head>
 
 <body>
 
-<h1>🎤 SK SES STUDIO PRO</h1>
+<h1>🎤 AI SES PRO 2</h1>
 
 <textarea id="text" placeholder="Metin yaz..."></textarea>
 
 <br>
 
-<select id="lang">
-    <option value="tr-TR">Türkçe</option>
-    <option value="en-US">English</option>
-</select>
+<button onclick="generate()">▶ SES ÜRET</button>
+<button onclick="stopAudio()">⏹ DUR</button>
 
-<select id="voiceType">
-    <option value="any">Otomatik</option>
-</select>
+<div id="status">Hazır</div>
 
-<br>
-
-<label>Hız</label>
-<input type="range" id="rate" min="0.5" max="2" value="1" step="0.1">
-
-<label>Ton</label>
-<input type="range" id="pitch" min="0" max="2" value="1" step="0.1">
-
-<br>
-
-<button onclick="play()">▶ ÇAL</button>
-<button onclick="pause()">⏸ DUR</button>
-<button onclick="resume()">▶ DEVAM</button>
-<button onclick="stop()">⏹ STOP</button>
-
-<br>
-
-<button onclick="record()">🔴 KAYIT BAŞLAT</button>
-<button onclick="stopRecord()">⏹ KAYDI DURDUR & İNDİR</button>
+<!-- PLAYER -->
+<div id="playerBox">
+    <audio id="audio" controls></audio>
+</div>
 
 <script>
 
-let voices = [];
-let mediaRecorder;
-let chunks = [];
+const audio = document.getElementById("audio");
+const playerBox = document.getElementById("playerBox");
+const statusBox = document.getElementById("status");
 
-function loadVoices(){
-    voices = speechSynthesis.getVoices();
-}
-
-speechSynthesis.onvoiceschanged = loadVoices;
-
-function play(){
+async function generate(){
 
     let text = document.getElementById("text").value;
-    if(!text) return;
 
-    let lang = document.getElementById("lang").value;
-    let rate = document.getElementById("rate").value;
-    let pitch = document.getElementById("pitch").value;
+    if(!text){
+        statusBox.innerText = "❌ Metin boş";
+        return;
+    }
 
-    let speech = new SpeechSynthesisUtterance(text);
+    statusBox.innerText = "⏳ Ses üretiliyor...";
 
-    speech.lang = lang;
-    speech.rate = rate;
-    speech.pitch = pitch;
+    try{
+        const res = await fetch("/tts", {
+            method:"POST",
+            headers:{
+                "Content-Type":"application/json"
+            },
+            body: JSON.stringify({ text })
+        });
 
-    let v = voices.find(v => v.lang.includes(lang.split("-")[0]));
+        if(!res.ok){
+            statusBox.innerText = "❌ Backend hatası (server açık mı?)";
+            return;
+        }
 
-    if(v) speech.voice = v;
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
 
-    speechSynthesis.cancel();
-    speechSynthesis.speak(speech);
-}
+        audio.src = url;
+        audio.play();
 
-function pause(){
-    speechSynthesis.pause();
-}
+        playerBox.style.display = "block";
+        statusBox.innerText = "✅ Ses hazır";
 
-function resume(){
-    speechSynthesis.resume();
-}
-
-function stop(){
-    speechSynthesis.cancel();
-}
-
-// 🔴 KAYIT (mikrofon + sistem sesi)
-async function record(){
-
-    let stream = await navigator.mediaDevices.getUserMedia({ audio:true });
-
-    mediaRecorder = new MediaRecorder(stream);
-    chunks = [];
-
-    mediaRecorder.ondataavailable = e => {
-        chunks.push(e.data);
-    };
-
-    mediaRecorder.onstop = e => {
-        let blob = new Blob(chunks, { type:'audio/webm' });
-        let url = URL.createObjectURL(blob);
-
-        let a = document.createElement("a");
-        a.href = url;
-        a.download = "sk-ses-kayit.webm";
-        a.click();
-    };
-
-    mediaRecorder.start();
-    alert("Kayıt başladı");
-}
-
-function stopRecord(){
-    if(mediaRecorder){
-        mediaRecorder.stop();
+    }catch(err){
+        console.log(err);
+        statusBox.innerText = "❌ Bağlantı hatası";
     }
 }
 
-loadVoices();
+function stopAudio(){
+    audio.pause();
+    audio.currentTime = 0;
+    statusBox.innerText = "⏹ Durdu";
+}
 
 </script>
 
