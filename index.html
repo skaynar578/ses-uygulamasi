@@ -2,28 +2,136 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<title>Ses Uygulaması</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SK Ses Studio</title>
+
+<style>
+body{
+    margin:0;
+    font-family:Arial;
+    background:#0b0b0b;
+    color:white;
+    text-align:center;
+    padding:20px;
+}
+
+h1{
+    margin-bottom:20px;
+}
+
+textarea{
+    width:90%;
+    height:120px;
+    font-size:16px;
+    padding:10px;
+    border-radius:10px;
+    border:none;
+}
+
+.controls{
+    margin-top:15px;
+}
+
+select, input, button{
+    padding:10px;
+    margin:5px;
+    border-radius:8px;
+    border:none;
+    font-size:14px;
+}
+
+button{
+    cursor:pointer;
+    background:#1e90ff;
+    color:white;
+}
+
+button:hover{
+    background:#0077cc;
+}
+</style>
 </head>
+
 <body>
 
-<h2>Ses Uygulaması</h2>
+<h1>🎤 SK SES STUDIO</h1>
 
-<textarea id="text" rows="5" cols="40" placeholder="Bir şey yaz..."></textarea>
-<br><br>
+<textarea id="text" placeholder="Buraya yaz..."></textarea>
 
-<button onclick="konus()">Sesi Çal</button>
+<div class="controls">
+
+<select id="lang">
+    <option value="tr-TR">Türkçe</option>
+    <option value="en-US">English</option>
+</select>
+
+<select id="voiceType">
+    <option value="any">Otomatik Ses</option>
+</select>
+
+<br>
+
+<label>Hız</label>
+<input type="range" id="rate" min="0.5" max="2" value="1" step="0.1">
+
+<label>Ton</label>
+<input type="range" id="pitch" min="0" max="2" value="1" step="0.1">
+
+</div>
+
+<br>
+
+<button onclick="speak()">▶ ÇAL</button>
+<button onclick="stop()">⏹ DUR</button>
+<button onclick="clearText()">🧹 TEMİZLE</button>
 
 <script>
-function konus() {
-    let text = document.getElementById("text").value;
 
-    if (!text) return;
+let voices = [];
+
+function loadVoices(){
+    voices = window.speechSynthesis.getVoices();
+}
+
+window.speechSynthesis.onvoiceschanged = loadVoices;
+
+function speak(){
+
+    let text = document.getElementById("text").value;
+    if(!text) return;
+
+    let lang = document.getElementById("lang").value;
+    let rate = document.getElementById("rate").value;
+    let pitch = document.getElementById("pitch").value;
 
     let speech = new SpeechSynthesisUtterance(text);
-    speech.lang = "tr-TR";
 
+    speech.lang = lang;
+    speech.rate = rate;
+    speech.pitch = pitch;
+
+    // ses seç
+    let selectedVoice = voices.find(v => v.lang === lang);
+
+    if(selectedVoice){
+        speech.voice = selectedVoice;
+    }
+
+    window.speechSynthesis.cancel();
     window.speechSynthesis.speak(speech);
 }
+
+function stop(){
+    window.speechSynthesis.cancel();
+}
+
+function clearText(){
+    document.getElementById("text").value = "";
+}
+
+// sesleri yükle
+loadVoices();
+
 </script>
 
 </body>
