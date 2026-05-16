@@ -10,37 +10,39 @@ app.use(cors());
 
 const upload = multer({ dest: "uploads/" });
 
-const API_KEY = "YOUR_OPENAI_API_KEY";
+const OPENAI_API_KEY = "YOUR_API_KEY";
 
-// 🎧 SPEECH → TEXT (WHISPER AI)
-app.post("/transcribe", upload.single("audio"), async (req,res)=>{
-    try{
+app.post("/transcribe", upload.single("audio"), async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.json({ error: "Dosya gelmedi" });
+        }
 
-        const form=new FormData();
-        form.append("file",fs.createReadStream(req.file.path));
-        form.append("model","whisper-1");
+        const formData = new FormData();
+        formData.append("file", fs.createReadStream(req.file.path));
+        formData.append("model", "whisper-1");
 
-        const response=await axios.post(
+        const response = await axios.post(
             "https://api.openai.com/v1/audio/transcriptions",
-            form,
+            formData,
             {
-                headers:{
-                    "Authorization":`Bearer ${API_KEY}`,
-                    ...form.getHeaders()
+                headers: {
+                    "Authorization": `Bearer ${OPENAI_API_KEY}`,
+                    ...formData.getHeaders()
                 }
             }
         );
 
         fs.unlinkSync(req.file.path);
 
-        res.json({text:response.data.text});
+        res.json({ text: response.data.text });
 
-    }catch(err){
+    } catch (err) {
         console.log(err.message);
-        res.json({error:err.message});
+        res.json({ error: err.message });
     }
 });
 
-app.listen(3000,()=>{
-    console.log("🚀 ULTRA PRO MAX AI ACTIVE");
+app.listen(3000, () => {
+    console.log("Server çalışıyor: http://localhost:3000");
 });
