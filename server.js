@@ -1,47 +1,45 @@
 const express = require("express");
+const multer = require("multer");
 const cors = require("cors");
-const axios = require("axios");
 const fs = require("fs");
+const axios = require("axios");
 
 const app = express();
 app.use(cors());
-app.use(express.json());
-app.use(express.static("public"));
 
-const ELEVEN_API_KEY = "BURAYA_API_KEY";
+const upload = multer({ dest: "uploads/" });
 
-app.post("/tts", async (req, res) => {
-    const { text } = req.body;
+// 🔥 OPENAI KEY BURAYA
+const OPENAI_API_KEY = "YOUR_API_KEY";
 
+app.post("/transcribe", upload.single("audio"), async (req, res) => {
     try {
-        const response = await axios({
-            method: "POST",
-            url: "https://api.elevenlabs.io/v1/text-to-speech/21m00Tcm4TlvDq8ikWAM",
-            headers: {
-                "xi-api-key": ELEVEN_API_KEY,
-                "Content-Type": "application/json"
-            },
-            data: {
-                text: text,
-                model_id: "eleven_multilingual_v2",
-                voice_settings: {
-                    stability: 0.5,
-                    similarity_boost: 0.8
+        const filePath = req.file.path;
+
+        const formData = new FormData();
+        formData.append("file", fs.createReadStream(filePath));
+        formData.append("model", "whisper-1");
+
+        const response = await axios.post(
+            "https://api.openai.com/v1/audio/transcriptions",
+            formData,
+            {
+                headers: {
+                    "Authorization": `Bearer ${OPENAI_API_KEY}`,
+                    ...formData.getHeaders()
                 }
-            },
-            responseType: "arraybuffer"
-        });
+            }
+        );
 
-        fs.writeFileSync("output.mp3", response.data);
+        fs.unlinkSync(filePath);
 
-        res.sendFile(__dirname + "/output.mp3");
+        res.json({ text: response.data.text });
 
     } catch (err) {
-        console.log(err);
-        res.status(500).send("Hata oluştu");
+        res.json({ error: err.message });
     }
 });
 
 app.listen(3000, () => {
-    console.log("AI SES PRO 2 çalışıyor: http://localhost:3000");
+    console.log("Server çalışıyor: http://localhost:3000");
 });
