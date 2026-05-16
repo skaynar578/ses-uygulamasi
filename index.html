@@ -2,8 +2,7 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<title>SK SES AI PRO</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SK AI SES STÜDYO (Node’suz)</title>
 
 <style>
 body{
@@ -20,18 +19,15 @@ body{
     padding:20px;
 }
 
-h1{
-    color:#f5c542;
-}
+h1{color:#f5c542;}
 
 textarea{
     width:100%;
     height:120px;
     border:none;
     border-radius:10px;
-    padding:15px;
+    padding:10px;
     font-size:16px;
-    outline:none;
 }
 
 button{
@@ -40,19 +36,18 @@ button{
     border:none;
     border-radius:8px;
     cursor:pointer;
-    font-size:15px;
 }
 
-.speak{background:#28a745;color:white;}
-.upload{background:#6f42c1;color:white;}
-.stop{background:#dc3545;color:white;}
+.green{background:#28a745;color:white;}
+.blue{background:#007bff;color:white;}
+.red{background:#dc3545;color:white;}
+.purple{background:#6f42c1;color:white;}
 
 .box{
     margin-top:15px;
     padding:15px;
     background:#1a1a1a;
     border-radius:10px;
-    min-height:50px;
 }
 </style>
 </head>
@@ -61,85 +56,104 @@ button{
 
 <div class="container">
 
-<h1>🎤 SK SES AI PRO</h1>
+<h1>🎤 SK AI SES STÜDYO</h1>
 
-<!-- METİNDEN SESE -->
-<h3>✍️ Metinden Sese</h3>
+<!-- METİN → SES -->
+<h3>✍️ Metin → Ses</h3>
 <textarea id="text" placeholder="Metin yaz..."></textarea><br>
 
-<button class="speak" onclick="textToSpeech()">🔊 Konuş</button>
-<button class="stop" onclick="stopSpeech()">⛔ Durdur</button>
+<button class="green" onclick="speak()">🔊 Konuş</button>
+<button class="red" onclick="stop()">⛔ Durdur</button>
 
-<hr style="margin:25px 0; border:1px solid #333;">
+<hr>
 
-<!-- SES → METİN -->
-<h3>🎧 Ses Dosyasını Metne Çevir</h3>
+<!-- SES → METİN (mikrofon) -->
+<h3>🎙️ Mikrofon → Metin</h3>
 
-<input type="file" id="audioFile" accept="audio/*"><br>
+<button class="blue" onclick="startMic()">🎤 Başlat</button>
+<button class="red" onclick="stopMic()">⛔ Durdur</button>
 
-<button class="upload" onclick="sendAudio()">🎧 Çevir</button>
+<div class="box" id="micText">Sonuç burada...</div>
 
-<div class="box" id="status">Durum: bekliyor...</div>
-<div class="box" id="result">Sonuç burada görünecek...</div>
+<hr>
+
+<!-- SES DOSYASI -->
+<h3>🎧 Ses Dosyası Yükle</h3>
+<input type="file" id="file" accept="audio/*"><br>
+
+<button class="purple" onclick="playFile()">▶ Çal</button>
+<button class="green" onclick="downloadFile()">⬇ İndir</button>
+
+<audio id="audio" controls style="width:100%;margin-top:10px;"></audio>
 
 </div>
 
 <script>
 
-// ---------------- METİN → SES ----------------
-function textToSpeech(){
+// 🔊 METİN → SES
+function speak(){
     let text = document.getElementById("text").value;
 
-    if(!text){
-        alert("Metin yaz!");
-        return;
-    }
+    let utter = new SpeechSynthesisUtterance(text);
+    utter.lang = "tr-TR";
 
-    let speech = new SpeechSynthesisUtterance(text);
-    speech.lang = "tr-TR";
-    speech.rate = 1;
-
-    window.speechSynthesis.speak(speech);
+    window.speechSynthesis.speak(utter);
 }
 
-function stopSpeech(){
+function stop(){
     window.speechSynthesis.cancel();
 }
 
-// ---------------- SES → METİN (BACKEND) ----------------
-async function sendAudio(){
+// 🎙️ MİKROFON → METİN
+let rec;
 
-    let file = document.getElementById("audioFile").files[0];
+function startMic(){
+    let SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    rec = new SR();
+    rec.lang = "tr-TR";
+    rec.continuous = true;
+
+    rec.onresult = function(e){
+        let text = "";
+        for(let i=e.resultIndex;i<e.results.length;i++){
+            text += e.results[i][0].transcript;
+        }
+        document.getElementById("micText").innerText = text;
+    };
+
+    rec.start();
+}
+
+function stopMic(){
+    if(rec) rec.stop();
+}
+
+// 🎧 SES DOSYASI
+let url = null;
+
+function playFile(){
+    let file = document.getElementById("file").files[0];
 
     if(!file){
-        document.getElementById("status").innerText = "❌ Dosya seçilmedi";
+        alert("Dosya seç!");
         return;
     }
 
-    document.getElementById("status").innerText = "⏳ İşleniyor...";
+    url = URL.createObjectURL(file);
+    document.getElementById("audio").src = url;
+}
 
-    let formData = new FormData();
-    formData.append("audio", file);
-
-    try{
-        let res = await fetch("http://localhost:3000/transcribe", {
-            method:"POST",
-            body: formData
-        });
-
-        let data = await res.json();
-
-        if(data.error){
-            document.getElementById("status").innerText = "❌ Hata: " + data.error;
-            return;
-        }
-
-        document.getElementById("status").innerText = "✅ Tamamlandı";
-        document.getElementById("result").innerText = data.text;
-
-    } catch(err){
-        document.getElementById("status").innerText = "❌ Server kapalı (node server.js)";
+function downloadFile(){
+    if(!url){
+        alert("Önce dosya yükle!");
+        return;
     }
+
+    let a = document.createElement("a");
+    a.href = url;
+    a.download = "ses.mp3";
+    a.click();
 }
 
 </script>
