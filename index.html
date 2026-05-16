@@ -2,65 +2,42 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<title>SK PRO AI VOICE</title>
+<title>Ses Uygulaması</title>
 </head>
+<body>
 
-<body style="background:#111;color:#d4af37;text-align:center;font-family:Arial">
+<h2>Ses Uygulaması</h2>
 
-<h1>🎤 SK PRO AI - SENİN SESİNLE ŞARKI</h1>
-
-<textarea id="lyrics" placeholder="Şarkı sözleri..." style="width:80%;height:120px"></textarea>
-
+<textarea id="text" rows="5" cols="40" placeholder="Bir şey yaz..."></textarea>
 <br><br>
 
-<input id="style" placeholder="arabesk / rap / pop">
-
-<br><br>
-
-<button onclick="generate()">🎵 SÖYLE</button>
-
-<p id="status"></p>
-
-<h3>🎤 SENİN SESİN</h3>
-<audio id="voice" controls></audio>
-
-<h3>🎵 BEAT</h3>
-<audio id="beat" controls></audio>
+<button onclick="konus()">Sesi Çal</button>
 
 <script>
+function konus() {
+    let text = document.getElementById("text").value;
+    if (!text) return;
 
-const API_URL = "https://SENIN-RENDER-URL.onrender.com/create";
+    let speech = new SpeechSynthesisUtterance(text);
+    speech.lang = "tr-TR";
+    speech.rate = 1;
+    speech.pitch = 1;
 
-async function generate(){
+    // Türkçe ses seçmeye çalış
+    let voices = window.speechSynthesis.getVoices();
+    let trVoice = voices.find(v => v.lang.includes("tr"));
 
-    const lyrics = document.getElementById("lyrics").value;
-    const style = document.getElementById("style").value;
-    const status = document.getElementById("status");
-
-    status.innerText = "🎤 Ses üretiliyor...";
-
-    try {
-
-        const res = await fetch(API_URL, {
-            method: "POST",
-            headers: {"Content-Type":"application/json"},
-            body: JSON.stringify({lyrics, style})
-        });
-
-        const data = await res.json();
-
-        if(!res.ok) throw new Error(data.error);
-
-        document.getElementById("voice").src = data.voice;
-        document.getElementById("beat").src = data.beat;
-
-        status.innerText = "✅ Hazır - Senin sesinle söylendi";
-
-    } catch(err){
-        status.innerText = "❌ " + err.message;
+    if (trVoice) {
+        speech.voice = trVoice;
     }
+
+    window.speechSynthesis.speak(speech);
 }
 
+// sesleri yükle
+window.speechSynthesis.onvoiceschanged = () => {
+    window.speechSynthesis.getVoices();
+};
 </script>
 
 </body>
