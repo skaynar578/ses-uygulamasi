@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SK Ses Studio</title>
+<title>SK SES STUDIO PRO</title>
 
 <style>
 body{
@@ -15,26 +15,19 @@ body{
     padding:20px;
 }
 
-h1{
-    margin-bottom:20px;
-}
+h1{margin-bottom:10px;}
 
 textarea{
     width:90%;
     height:120px;
-    font-size:16px;
     padding:10px;
+    font-size:16px;
     border-radius:10px;
-    border:none;
-}
-
-.controls{
-    margin-top:15px;
 }
 
 select, input, button{
-    padding:10px;
     margin:5px;
+    padding:10px;
     border-radius:8px;
     border:none;
     font-size:14px;
@@ -47,18 +40,18 @@ button{
 }
 
 button:hover{
-    background:#0077cc;
+    background:#0066cc;
 }
 </style>
 </head>
 
 <body>
 
-<h1>🎤 SK SES STUDIO</h1>
+<h1>🎤 SK SES STUDIO PRO</h1>
 
-<textarea id="text" placeholder="Buraya yaz..."></textarea>
+<textarea id="text" placeholder="Metin yaz..."></textarea>
 
-<div class="controls">
+<br>
 
 <select id="lang">
     <option value="tr-TR">Türkçe</option>
@@ -66,7 +59,7 @@ button:hover{
 </select>
 
 <select id="voiceType">
-    <option value="any">Otomatik Ses</option>
+    <option value="any">Otomatik</option>
 </select>
 
 <br>
@@ -77,25 +70,31 @@ button:hover{
 <label>Ton</label>
 <input type="range" id="pitch" min="0" max="2" value="1" step="0.1">
 
-</div>
+<br>
+
+<button onclick="play()">▶ ÇAL</button>
+<button onclick="pause()">⏸ DUR</button>
+<button onclick="resume()">▶ DEVAM</button>
+<button onclick="stop()">⏹ STOP</button>
 
 <br>
 
-<button onclick="speak()">▶ ÇAL</button>
-<button onclick="stop()">⏹ DUR</button>
-<button onclick="clearText()">🧹 TEMİZLE</button>
+<button onclick="record()">🔴 KAYIT BAŞLAT</button>
+<button onclick="stopRecord()">⏹ KAYDI DURDUR & İNDİR</button>
 
 <script>
 
 let voices = [];
+let mediaRecorder;
+let chunks = [];
 
 function loadVoices(){
-    voices = window.speechSynthesis.getVoices();
+    voices = speechSynthesis.getVoices();
 }
 
-window.speechSynthesis.onvoiceschanged = loadVoices;
+speechSynthesis.onvoiceschanged = loadVoices;
 
-function speak(){
+function play(){
 
     let text = document.getElementById("text").value;
     if(!text) return;
@@ -110,26 +109,58 @@ function speak(){
     speech.rate = rate;
     speech.pitch = pitch;
 
-    // ses seç
-    let selectedVoice = voices.find(v => v.lang === lang);
+    let v = voices.find(v => v.lang.includes(lang.split("-")[0]));
 
-    if(selectedVoice){
-        speech.voice = selectedVoice;
-    }
+    if(v) speech.voice = v;
 
-    window.speechSynthesis.cancel();
-    window.speechSynthesis.speak(speech);
+    speechSynthesis.cancel();
+    speechSynthesis.speak(speech);
+}
+
+function pause(){
+    speechSynthesis.pause();
+}
+
+function resume(){
+    speechSynthesis.resume();
 }
 
 function stop(){
-    window.speechSynthesis.cancel();
+    speechSynthesis.cancel();
 }
 
-function clearText(){
-    document.getElementById("text").value = "";
+// 🔴 KAYIT (mikrofon + sistem sesi)
+async function record(){
+
+    let stream = await navigator.mediaDevices.getUserMedia({ audio:true });
+
+    mediaRecorder = new MediaRecorder(stream);
+    chunks = [];
+
+    mediaRecorder.ondataavailable = e => {
+        chunks.push(e.data);
+    };
+
+    mediaRecorder.onstop = e => {
+        let blob = new Blob(chunks, { type:'audio/webm' });
+        let url = URL.createObjectURL(blob);
+
+        let a = document.createElement("a");
+        a.href = url;
+        a.download = "sk-ses-kayit.webm";
+        a.click();
+    };
+
+    mediaRecorder.start();
+    alert("Kayıt başladı");
 }
 
-// sesleri yükle
+function stopRecord(){
+    if(mediaRecorder){
+        mediaRecorder.stop();
+    }
+}
+
 loadVoices();
 
 </script>
