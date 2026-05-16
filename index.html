@@ -2,52 +2,67 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<title>SK AI SES STÜDYO (Node’suz)</title>
+<title>AI PRO SES 2.0</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
 body{
     margin:0;
     font-family:Arial;
-    background:#0b0b0b;
+    background:linear-gradient(135deg,#0b0b0b,#111);
     color:white;
     text-align:center;
 }
 
 .container{
-    max-width:800px;
-    margin:40px auto;
+    max-width:900px;
+    margin:30px auto;
     padding:20px;
 }
 
-h1{color:#f5c542;}
+h1{
+    color:#f5c542;
+    font-size:32px;
+}
+
+.card{
+    background:#1a1a1a;
+    padding:20px;
+    border-radius:15px;
+    margin:15px 0;
+    box-shadow:0 0 10px rgba(255,255,255,0.05);
+}
 
 textarea{
     width:100%;
     height:120px;
-    border:none;
     border-radius:10px;
-    padding:10px;
+    border:none;
+    padding:12px;
     font-size:16px;
 }
 
 button{
-    margin:8px;
-    padding:12px 18px;
+    margin:6px;
+    padding:12px 16px;
     border:none;
     border-radius:8px;
     cursor:pointer;
+    font-size:14px;
 }
 
 .green{background:#28a745;color:white;}
 .blue{background:#007bff;color:white;}
 .red{background:#dc3545;color:white;}
 .purple{background:#6f42c1;color:white;}
+.orange{background:#ff9800;color:white;}
 
-.box{
-    margin-top:15px;
-    padding:15px;
-    background:#1a1a1a;
-    border-radius:10px;
+.output{
+    margin-top:10px;
+    padding:10px;
+    background:#000;
+    border-radius:8px;
+    min-height:40px;
 }
 </style>
 </head>
@@ -56,46 +71,54 @@ button{
 
 <div class="container">
 
-<h1>🎤 SK AI SES STÜDYO</h1>
+<h1>🎧 AI PRO SES 2.0</h1>
 
 <!-- METİN → SES -->
-<h3>✍️ Metin → Ses</h3>
+<div class="card">
+<h3>✍️ Metin → AI Ses</h3>
+
 <textarea id="text" placeholder="Metin yaz..."></textarea><br>
 
-<button class="green" onclick="speak()">🔊 Konuş</button>
+<button class="green" onclick="speak()">🔊 AI Seslendir</button>
 <button class="red" onclick="stop()">⛔ Durdur</button>
+</div>
 
-<hr>
-
-<!-- SES → METİN (mikrofon) -->
-<h3>🎙️ Mikrofon → Metin</h3>
+<!-- MİKROFON → METİN -->
+<div class="card">
+<h3>🎙️ Gerçek Zamanlı Konuşma → Metin</h3>
 
 <button class="blue" onclick="startMic()">🎤 Başlat</button>
 <button class="red" onclick="stopMic()">⛔ Durdur</button>
 
-<div class="box" id="micText">Sonuç burada...</div>
-
-<hr>
+<div class="output" id="micOut">Bekleniyor...</div>
+</div>
 
 <!-- SES DOSYASI -->
-<h3>🎧 Ses Dosyası Yükle</h3>
+<div class="card">
+<h3>🎧 Ses Dosyası</h3>
+
 <input type="file" id="file" accept="audio/*"><br>
 
-<button class="purple" onclick="playFile()">▶ Çal</button>
-<button class="green" onclick="downloadFile()">⬇ İndir</button>
+<button class="purple" onclick="load()">▶ Çal</button>
+<button class="orange" onclick="download()">⬇ İndir</button>
 
 <audio id="audio" controls style="width:100%;margin-top:10px;"></audio>
+</div>
 
 </div>
 
 <script>
 
-// 🔊 METİN → SES
+// 🔊 METİN → SES (AI TTS)
 function speak(){
     let text = document.getElementById("text").value;
 
     let utter = new SpeechSynthesisUtterance(text);
+
+    // daha doğal ses ayarı
     utter.lang = "tr-TR";
+    utter.rate = 1;
+    utter.pitch = 1.1;
 
     window.speechSynthesis.speak(utter);
 }
@@ -114,12 +137,12 @@ function startMic(){
     rec.lang = "tr-TR";
     rec.continuous = true;
 
-    rec.onresult = function(e){
-        let text = "";
+    rec.onresult = (e)=>{
+        let txt = "";
         for(let i=e.resultIndex;i<e.results.length;i++){
-            text += e.results[i][0].transcript;
+            txt += e.results[i][0].transcript;
         }
-        document.getElementById("micText").innerText = text;
+        document.getElementById("micOut").innerText = txt;
     };
 
     rec.start();
@@ -130,11 +153,10 @@ function stopMic(){
 }
 
 // 🎧 SES DOSYASI
-let url = null;
+let url;
 
-function playFile(){
+function load(){
     let file = document.getElementById("file").files[0];
-
     if(!file){
         alert("Dosya seç!");
         return;
@@ -144,15 +166,15 @@ function playFile(){
     document.getElementById("audio").src = url;
 }
 
-function downloadFile(){
+function download(){
     if(!url){
-        alert("Önce dosya yükle!");
+        alert("Önce yükle!");
         return;
     }
 
     let a = document.createElement("a");
     a.href = url;
-    a.download = "ses.mp3";
+    a.download = "ai-ses.mp3";
     a.click();
 }
 
