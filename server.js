@@ -8,57 +8,39 @@ const FormData = require("form-data");
 const app = express();
 app.use(cors());
 
-// uploads klasörü yoksa oluştur
-if (!fs.existsSync("uploads")) {
-    fs.mkdirSync("uploads");
-}
-
 const upload = multer({ dest: "uploads/" });
 
-// 🔴 BURAYA OPENAI KEY GİRECEKSİN
-const OPENAI_API_KEY = "YOUR_API_KEY";
+const API_KEY = "YOUR_OPENAI_API_KEY";
 
-app.post("/transcribe", upload.single("audio"), async (req, res) => {
-    try {
+// 🎧 SPEECH → TEXT (WHISPER AI)
+app.post("/transcribe", upload.single("audio"), async (req,res)=>{
+    try{
 
-        if (!req.file) {
-            return res.status(400).json({ error: "Dosya gelmedi" });
-        }
+        const form=new FormData();
+        form.append("file",fs.createReadStream(req.file.path));
+        form.append("model","whisper-1");
 
-        const formData = new FormData();
-
-        formData.append("file", fs.createReadStream(req.file.path));
-        formData.append("model", "whisper-1");
-
-        const response = await axios.post(
+        const response=await axios.post(
             "https://api.openai.com/v1/audio/transcriptions",
-            formData,
+            form,
             {
-                headers: {
-                    "Authorization": `Bearer ${OPENAI_API_KEY}`,
-                    ...formData.getHeaders()
+                headers:{
+                    "Authorization":`Bearer ${API_KEY}`,
+                    ...form.getHeaders()
                 }
             }
         );
 
-        // geçici dosyayı sil
         fs.unlinkSync(req.file.path);
 
-        return res.json({ text: response.data.text });
+        res.json({text:response.data.text});
 
-    } catch (err) {
-        console.log("HATA:", err.response?.data || err.message);
-
-        return res.status(500).json({
-            error: err.response?.data?.error?.message || err.message
-        });
+    }catch(err){
+        console.log(err.message);
+        res.json({error:err.message});
     }
 });
 
-app.get("/", (req, res) => {
-    res.send("SK AI Server Çalışıyor");
-});
-
-app.listen(3000, () => {
-    console.log("🚀 Server çalışıyor: http://localhost:3000");
+app.listen(3000,()=>{
+    console.log("🚀 ULTRA PRO MAX AI ACTIVE");
 });
