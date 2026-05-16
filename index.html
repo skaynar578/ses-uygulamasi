@@ -16,28 +16,14 @@
 <script>
 function konus() {
     let text = document.getElementById("text").value;
+
     if (!text) return;
 
     let speech = new SpeechSynthesisUtterance(text);
     speech.lang = "tr-TR";
-    speech.rate = 1;
-    speech.pitch = 1;
-
-    // Türkçe ses seçmeye çalış
-    let voices = window.speechSynthesis.getVoices();
-    let trVoice = voices.find(v => v.lang.includes("tr"));
-
-    if (trVoice) {
-        speech.voice = trVoice;
-    }
 
     window.speechSynthesis.speak(speech);
 }
-
-// sesleri yükle
-window.speechSynthesis.onvoiceschanged = () => {
-    window.speechSynthesis.getVoices();
-};
 </script>
 
 </body>
