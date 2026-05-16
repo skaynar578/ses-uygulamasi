@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SK SES STUDIO PRO</title>
+<title>AI SES PRO 2</title>
 
 <style>
 body{
@@ -19,10 +19,12 @@ h1{margin-bottom:10px;}
 
 textarea{
     width:90%;
-    height:120px;
+    height:140px;
     padding:10px;
     font-size:16px;
     border-radius:10px;
+    border:none;
+    outline:none;
 }
 
 select, input, button{
@@ -42,24 +44,31 @@ button{
 button:hover{
     background:#0066cc;
 }
+
+.card{
+    background:#161616;
+    padding:15px;
+    border-radius:12px;
+    width:90%;
+    margin:auto;
+    margin-top:10px;
+}
 </style>
 </head>
 
 <body>
 
-<h1>🎤 SK SES STUDIO PRO</h1>
+<h1>🎤 AI SES PRO 2</h1>
+
+<div class="card">
 
 <textarea id="text" placeholder="Metin yaz..."></textarea>
 
 <br>
 
-<select id="lang">
-    <option value="tr-TR">Türkçe</option>
-    <option value="en-US">English</option>
-</select>
-
-<select id="voiceType">
-    <option value="any">Otomatik</option>
+<select id="voice">
+    <option value="eleven">AI Ses (ElevenLabs)</option>
+    <option value="browser">Tarayıcı Ses</option>
 </select>
 
 <br>
@@ -72,96 +81,86 @@ button:hover{
 
 <br>
 
-<button onclick="play()">▶ ÇAL</button>
-<button onclick="pause()">⏸ DUR</button>
-<button onclick="resume()">▶ DEVAM</button>
-<button onclick="stop()">⏹ STOP</button>
+<button onclick="generate()">▶ SES ÜRET</button>
+<button onclick="playBrowser()">🧠 TARAYICI SES</button>
+<button onclick="stop()">⏹ DUR</button>
 
-<br>
+<br><br>
 
-<button onclick="record()">🔴 KAYIT BAŞLAT</button>
-<button onclick="stopRecord()">⏹ KAYDI DURDUR & İNDİR</button>
+<audio id="audio" controls style="width:90%;"></audio>
+
+</div>
 
 <script>
 
-let voices = [];
-let mediaRecorder;
-let chunks = [];
+// =====================
+// AI SES (backend)
+// =====================
+async function generate(){
 
-function loadVoices(){
-    voices = speechSynthesis.getVoices();
+    let text = document.getElementById("text").value;
+    let voice = document.getElementById("voice").value;
+
+    if(!text) return;
+
+    if(voice === "eleven"){
+
+        try{
+            const res = await fetch("http://localhost:3000/tts", {
+                method:"POST",
+                headers:{
+                    "Content-Type":"application/json"
+                },
+                body: JSON.stringify({ text })
+            });
+
+            const blob = await res.blob();
+            const url = URL.createObjectURL(blob);
+
+            let audio = document.getElementById("audio");
+            audio.src = url;
+            audio.play();
+
+        }catch(err){
+            alert("AI ses hatası (backend açık mı?)");
+        }
+
+    } else {
+        playBrowser();
+    }
 }
 
-speechSynthesis.onvoiceschanged = loadVoices;
-
-function play(){
+// =====================
+// TARAYICI SES (fallback)
+// =====================
+function playBrowser(){
 
     let text = document.getElementById("text").value;
     if(!text) return;
 
-    let lang = document.getElementById("lang").value;
     let rate = document.getElementById("rate").value;
     let pitch = document.getElementById("pitch").value;
 
     let speech = new SpeechSynthesisUtterance(text);
 
-    speech.lang = lang;
+    speech.lang = "tr-TR";
     speech.rate = rate;
     speech.pitch = pitch;
 
-    let v = voices.find(v => v.lang.includes(lang.split("-")[0]));
-
-    if(v) speech.voice = v;
-
-    speechSynthesis.cancel();
-    speechSynthesis.speak(speech);
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(speech);
 }
 
-function pause(){
-    speechSynthesis.pause();
-}
-
-function resume(){
-    speechSynthesis.resume();
-}
-
+// =====================
+// DUR
+// =====================
 function stop(){
-    speechSynthesis.cancel();
+    window.speechSynthesis.cancel();
+
+    let audio = document.getElementById("audio");
+    audio.pause();
+    audio.currentTime = 0;
 }
-
-// 🔴 KAYIT (mikrofon + sistem sesi)
-async function record(){
-
-    let stream = await navigator.mediaDevices.getUserMedia({ audio:true });
-
-    mediaRecorder = new MediaRecorder(stream);
-    chunks = [];
-
-    mediaRecorder.ondataavailable = e => {
-        chunks.push(e.data);
-    };
-
-    mediaRecorder.onstop = e => {
-        let blob = new Blob(chunks, { type:'audio/webm' });
-        let url = URL.createObjectURL(blob);
-
-        let a = document.createElement("a");
-        a.href = url;
-        a.download = "sk-ses-kayit.webm";
-        a.click();
-    };
-
-    mediaRecorder.start();
-    alert("Kayıt başladı");
-}
-
-function stopRecord(){
-    if(mediaRecorder){
-        mediaRecorder.stop();
-    }
-}
-
-loadVoices();
 
 </script>
 
