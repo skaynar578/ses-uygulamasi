@@ -2,7 +2,7 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<title>SK Ses AI - TTS & STT</title>
+<title>SK SES AI PRO</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
@@ -16,13 +16,12 @@ body{
 
 .container{
     max-width:800px;
-    margin:50px auto;
+    margin:40px auto;
     padding:20px;
 }
 
 h1{
     color:#f5c542;
-    margin-bottom:30px;
 }
 
 textarea{
@@ -32,44 +31,27 @@ textarea{
     border-radius:10px;
     padding:15px;
     font-size:16px;
-    outline:none;
 }
 
 button{
-    margin:10px;
-    padding:12px 20px;
+    margin:8px;
+    padding:12px 18px;
     border:none;
     border-radius:8px;
     cursor:pointer;
-    font-size:16px;
-    transition:0.2s;
 }
 
-button:hover{
-    transform:scale(1.05);
-}
+.speak{background:#28a745;color:white;}
+.listen{background:#007bff;color:white;}
+.stop{background:#dc3545;color:white;}
+.upload{background:#6f42c1;color:white;}
+.download{background:#ff9800;color:white;}
 
-.speak{
-    background:#28a745;
-    color:white;
-}
-
-.listen{
-    background:#007bff;
-    color:white;
-}
-
-.stop{
-    background:#dc3545;
-    color:white;
-}
-
-.output{
+.box{
     margin-top:20px;
     padding:15px;
     background:#1a1a1a;
     border-radius:10px;
-    min-height:60px;
 }
 </style>
 </head>
@@ -77,40 +59,52 @@ button:hover{
 <body>
 
 <div class="container">
-    <h1>🎤 SK SES AI STÜDYO</h1>
+<h1>🎤 SK SES AI PRO</h1>
 
-    <h3>✍️ Metinden Sese</h3>
-    <textarea id="text" placeholder="Buraya yaz..."></textarea><br>
+<!-- METİN -->
+<h3>✍️ Metinden Sese</h3>
+<textarea id="text" placeholder="Buraya yaz..."></textarea><br>
 
-    <button class="speak" onclick="speakText()">🔊 Konuş</button>
-    <button class="stop" onclick="stopSpeech()">⛔ Durdur</button>
+<button class="speak" onclick="speakText()">🔊 Konuş</button>
+<button class="stop" onclick="stopSpeech()">⛔ Durdur</button>
 
-    <hr style="margin:30px 0; border:1px solid #333;">
+<hr style="margin:25px 0; border:1px solid #333;">
 
-    <h3>🎙️ Sesten Metne</h3>
+<!-- SES TANIMA -->
+<h3>🎙️ Sesten Metne</h3>
+<button class="listen" onclick="startListening()">🎤 Dinle</button>
+<button class="stop" onclick="stopListening()">⛔ Durdur</button>
 
-    <button class="listen" onclick="startListening()">🎤 Dinlemeyi Başlat</button>
-    <button class="stop" onclick="stopListening()">⛔ Durdur</button>
+<div class="box" id="output">Sonuç...</div>
 
-    <div class="output" id="output">Sonuç burada görünecek...</div>
+<hr style="margin:25px 0; border:1px solid #333;">
+
+<!-- SES YÜKLEME -->
+<h3>🎧 Ses Yükleme</h3>
+<input type="file" id="audioFile" accept="audio/*"><br>
+
+<button class="upload" onclick="loadAudio()">📂 Yükle & Oynat</button>
+<button class="download" onclick="downloadAudio()">⬇️ İndir</button>
+
+<audio id="player" controls style="width:100%;margin-top:10px;"></audio>
+
+<hr style="margin:25px 0; border:1px solid #333;">
+
+<!-- SES KAYDI -->
+<h3>🎙️ Ses Kaydı (İndirilebilir)</h3>
+
+<button class="listen" onclick="startRecord()">🔴 Kayıt Başlat</button>
+<button class="stop" onclick="stopRecord()">⛔ Kayıt Durdur</button>
+
 </div>
 
 <script>
-// -------------------- METİNDEN SESE --------------------
+// ---------------- TTS ----------------
 function speakText(){
     let text = document.getElementById("text").value;
 
-    if(text.trim() === ""){
-        alert("Bir şey yazmalısın!");
-        return;
-    }
-
-    let speech = new SpeechSynthesisUtterance();
-    speech.text = text;
+    let speech = new SpeechSynthesisUtterance(text);
     speech.lang = "tr-TR";
-    speech.rate = 1;
-    speech.pitch = 1;
-
     window.speechSynthesis.speak(speech);
 }
 
@@ -118,37 +112,89 @@ function stopSpeech(){
     window.speechSynthesis.cancel();
 }
 
-// -------------------- Sesten Metne --------------------
+// ---------------- STT ----------------
 let recognition;
 
 function startListening(){
-    let SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    let SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    recognition = new SR();
 
-    if(!SpeechRecognition){
-        alert("Tarayıcın ses tanımayı desteklemiyor!");
-        return;
-    }
-
-    recognition = new SpeechRecognition();
     recognition.lang = "tr-TR";
     recognition.continuous = true;
 
-    recognition.onresult = function(event){
-        let transcript = "";
-
-        for(let i = event.resultIndex; i < event.results.length; i++){
-            transcript += event.results[i][0].transcript;
+    recognition.onresult = (e)=>{
+        let text = "";
+        for(let i=e.resultIndex;i<e.results.length;i++){
+            text += e.results[i][0].transcript;
         }
-
-        document.getElementById("output").innerText = transcript;
+        document.getElementById("output").innerText = text;
     };
 
     recognition.start();
 }
 
 function stopListening(){
-    if(recognition){
-        recognition.stop();
+    if(recognition) recognition.stop();
+}
+
+// ---------------- SES YÜKLE ----------------
+let uploadedFileURL = null;
+
+function loadAudio(){
+    let file = document.getElementById("audioFile").files[0];
+    if(!file){
+        alert("Dosya seç!");
+        return;
+    }
+
+    uploadedFileURL = URL.createObjectURL(file);
+    document.getElementById("player").src = uploadedFileURL;
+}
+
+// indir
+function downloadAudio(){
+    if(!uploadedFileURL){
+        alert("Önce ses yükle!");
+        return;
+    }
+
+    let a = document.createElement("a");
+    a.href = uploadedFileURL;
+    a.download = "ses.mp3";
+    a.click();
+}
+
+// ---------------- SES KAYIT ----------------
+let mediaRecorder;
+let chunks = [];
+
+function startRecord(){
+    navigator.mediaDevices.getUserMedia({audio:true})
+    .then(stream=>{
+        mediaRecorder = new MediaRecorder(stream);
+        mediaRecorder.start();
+
+        chunks = [];
+
+        mediaRecorder.ondataavailable = e=>{
+            chunks.push(e.data);
+        };
+
+        mediaRecorder.onstop = ()=>{
+            let blob = new Blob(chunks,{type:"audio/webm"});
+            let url = URL.createObjectURL(blob);
+
+            let a = document.createElement("a");
+            a.href = url;
+            a.download = "kayit.webm";
+            a.click();
+        };
+    });
+}
+
+function stopRecord(){
+    if(mediaRecorder){
+        mediaRecorder.stop();
     }
 }
 </script>
