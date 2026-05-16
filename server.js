@@ -3,21 +3,23 @@ const multer = require("multer");
 const cors = require("cors");
 const fs = require("fs");
 const axios = require("axios");
+const FormData = require("form-data");
 
 const app = express();
 app.use(cors());
 
 const upload = multer({ dest: "uploads/" });
 
-// 🔥 OPENAI KEY BURAYA
 const OPENAI_API_KEY = "YOUR_API_KEY";
 
 app.post("/transcribe", upload.single("audio"), async (req, res) => {
     try {
-        const filePath = req.file.path;
+        if (!req.file) {
+            return res.json({ error: "Dosya gelmedi" });
+        }
 
         const formData = new FormData();
-        formData.append("file", fs.createReadStream(filePath));
+        formData.append("file", fs.createReadStream(req.file.path));
         formData.append("model", "whisper-1");
 
         const response = await axios.post(
@@ -31,11 +33,12 @@ app.post("/transcribe", upload.single("audio"), async (req, res) => {
             }
         );
 
-        fs.unlinkSync(filePath);
+        fs.unlinkSync(req.file.path);
 
         res.json({ text: response.data.text });
 
     } catch (err) {
+        console.log(err.message);
         res.json({ error: err.message });
     }
 });
